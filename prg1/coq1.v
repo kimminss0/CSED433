@@ -1,46 +1,46 @@
 (*
-  CSE-433 Logic in Computer Science, POSTECH (gla@postech.ac.kr)  
-    --- Propositional Logic 
+  CSE-433 Logic in Computer Science, POSTECH (gla@postech.ac.kr)
+    --- Propositional Logic
 
-  The handin directory is programming2.postech.ac.kr:/home/class/cs433/handin/<HemosID>/.  
+  The handin directory is programming2.postech.ac.kr:/home/class/cs433/handin/<HemosID>/.
  *)
 
 (*
- 
+
   Tactics to practice:
-    intro[s] 
-      [H H'] 
+    intro[s]
+      [H H']
       [H | H']
-    apply 
+    apply
     assumption
-    exact 
+    exact
     split
     left
-    right 
-    elim 
+    right
+    elim
     destruct
 
   Tacticals to practice:
-    T1 ; T2 
-    [T1 | T2] 
+    T1 ; T2
+    [T1 | T2]
 
   Tactics to remember, but not to be used in your solutions:
     assert
     cut
-    auto 
+    auto
  *)
 
-Section Propositional. 
+Section Propositional.
 
-Variables A B C D : Prop. 
+Variables A B C D : Prop.
 
 (*
- * Part 0 - introduction 
+ * Part 0 - introduction
  *)
 
-Lemma id : A -> A. 
+Lemma id : A -> A.
 Proof.
-(* Use 'intro' tactic to apply the implication-introduction rule. 
+(* Use 'intro' tactic to apply the implication-introduction rule.
    Note that a new hypothesis of A is produced and the goal changes to A.
  *)
 intro H.
@@ -59,14 +59,14 @@ Qed.
 Lemma imp_dist : (A -> B -> C) -> (A -> B) -> A -> C.
 Proof.
 (* Use 'intros' tactic to produce three hypotheses H H' H''.
-   Note also that if you don't provide the names of hypotheses, 
+   Note also that if you don't provide the names of hypotheses,
    Coq automatically chooses an appropriate name for each hypothesis. *)
 intros H H' H''.
 (* Note that the last proposition in H matches the current goal.
-   Therefore, by applying the implication elimination rules twice to hypothesis H, 
+   Therefore, by applying the implication elimination rules twice to hypothesis H,
    the whole problem reduces to proving A and B. *)
 apply H.
-(* Now we have two separate goals A and B. 
+(* Now we have two separate goals A and B.
    For the first goal, we use hypothesis H''. *)
 exact H''.
 (* For the second goal, we use 'apply' tactic to apply the implication elimination rule to hypothesis H'. *)
@@ -82,9 +82,9 @@ intro H.
    So we use 'split' tactic which corresponds to the conjunction-introduction rule. *)
 split.
 (* Now we apply the conjunction-elimination rule to H.
-   Observe that tactic 'elim' changes the goal to A -> B -> B. 
+   Observe that tactic 'elim' changes the goal to A -> B -> B.
    This may seem unusual, but proving A -> B -> B is equivalent to proving B under two
-   hypotheses A and B (after applying the implication-introduction rule twice). 
+   hypotheses A and B (after applying the implication-introduction rule twice).
    This is the way that Coq handles conjunction. *)
 elim H.
 intros Ha Hb.
@@ -96,7 +96,7 @@ Qed.
 
 Lemma conj_com' : A /\ B -> B /\ A.
 Proof.
-(* Here is another proof of the same judgment. 
+(* Here is another proof of the same judgment.
    Instead of applying 'intro' and then 'elim' tactics, we use a pattern of hypothesis.
    The pattern [Ha Hb] binds Ha to the first hypothesis (which is A in this case)
    Hb to the second hypothesis. *)
@@ -115,13 +115,13 @@ Lemma disj_com : A \/ B -> B \/ A.
 Proof.
 (* First introduce a hypothesis H : A \/ B. *)
 intro H.
-(* We have to apply the disjunction-elimination rule to H. 
-   The corresponding tactic is 'elim'. 
-   Since the disjunction-elimination rule consider two possibilities, 
+(* We have to apply the disjunction-elimination rule to H.
+   The corresponding tactic is 'elim'.
+   Since the disjunction-elimination rule consider two possibilities,
    we now have prove the goal B \/ A under two different assumptions. *)
 elim H.
-(* For the first subgoal, we have to prove the right component of the disjunction, 
-   that is, apply the disjunction-introduction-right rule. 
+(* For the first subgoal, we have to prove the right component of the disjunction,
+   that is, apply the disjunction-introduction-right rule.
    The corresponding tactic is 'right'. *)
 right.
 assumption.
@@ -131,7 +131,7 @@ Qed.
 
 Lemma disj_com' : A \/ B -> B \/ A.
 Proof.
-(* Here is another proof of the same judgment using a pattern of hypotheses. 
+(* Here is another proof of the same judgment using a pattern of hypotheses.
    We use [ Ha | Hb ] to bind Ha to the first hypothesis A and Hb to the second hypothesis. *)
 intros [ Ha | Hb ].
 right; assumption.
@@ -144,21 +144,21 @@ Proof.
    the second goal, you can use the tactical [T1 | T2] to solve both subgoals.
    Hence the above judgment can be solved as follows: *)
 intros [Ha | Hb]; [ right | left ]; assumption.
-Qed. 
+Qed.
 
 (* This example illustrates the composition of patterns of hypotheses. *)
 Lemma and_assoc : A /\ (B /\ C) -> (A /\ B) /\ C.
 Proof.
 intros [H [H1 H2]].
 split; [split; assumption | assumption].
-Qed. 
+Qed.
 
 (* If we have a hypothsis H of A -> B and another hypothesis p of A,
     we may write (H p) as a hypothesis of B. *)
 Lemma and_imp_dist : (A -> B) /\ (C -> D) -> A /\ C -> B /\ D.
 Proof.
 intros [H H'] [p q].
-split; [exact (H p) | exact (H' q)]. 
+split; [exact (H p) | exact (H' q)].
 Qed.
 
 (* The following example illustrates that the tactic corresponding to the negation-elimination rule
@@ -171,8 +171,8 @@ assumption.
 assumption.
 Qed.
 
-(* 
- * Part 1 - Basic connectives in propositional logic 
+(*
+ * Part 1 - Basic connectives in propositional logic
  *)
 
 Lemma impl_distr : (A -> B) -> (A -> C) -> A -> B -> C.
@@ -181,19 +181,19 @@ Admitted.
 Lemma impl_comp : (A -> B) -> (B -> C) -> A -> C.
 Admitted.
 
-Lemma impl_perm : (A -> B -> C) -> B -> A -> C. 
+Lemma impl_perm : (A -> B -> C) -> B -> A -> C.
 Admitted.
 
-Lemma impl_conj : A -> B -> A /\ B. 
+Lemma impl_conj : A -> B -> A /\ B.
 Admitted.
 
-Lemma conj_elim_l : A /\ B -> A. 
+Lemma conj_elim_l : A /\ B -> A.
 Admitted.
 
 Lemma disj_intro_l : A -> A \/ B.
 Admitted.
 
-Lemma disj_elim : A \/ B -> (A -> C) -> (B -> C) -> C. 
+Lemma disj_elim : A \/ B -> (A -> C) -> (B -> C) -> C.
 Admitted.
 
 Lemma diamond : (A -> B) -> (A -> C) -> (B -> C -> D) -> A -> D.
@@ -207,7 +207,7 @@ Admitted.
 
 Lemma disj_impl_dist : (A \/ B -> C) -> (A -> C) /\ (B -> C).
 Admitted.
- 
+
 Lemma disj_impl_dist_inv : (A -> C) /\ (B -> C) -> A \/ B -> C.
 Admitted.
 
@@ -217,8 +217,8 @@ Admitted.
 Lemma uncurry : (A -> B -> C) -> A /\ B -> C.
 Admitted.
 
-(* 
- * Part 2 - Negation 
+(*
+ * Part 2 - Negation
  *)
 
 Lemma not_contrad :  ~(A /\ ~A).
@@ -236,7 +236,7 @@ Admitted.
 Lemma de_morgan_3 : ~A \/ ~B -> ~(A /\ B).
 Admitted.
 
-Lemma contrapositive : (A -> B) -> (~B -> ~A). 
+Lemma contrapositive : (A -> B) -> (~B -> ~A).
 Admitted.
 
 Lemma neg_double : A -> ~~A.
@@ -248,8 +248,8 @@ Admitted.
 Lemma weak_dneg : ~~(~~A -> A).
 Admitted.
 
-(* 
- * Part 3 - Classical logic 
+(*
+ * Part 3 - Classical logic
  *)
 
 Lemma em_peirce : A \/ ~A -> ((A -> B) -> A) -> A.
@@ -262,5 +262,3 @@ Lemma dne_em : (~~(B \/ ~B)-> (B \/ ~B)) -> B \/ ~B.
 Admitted.
 
 End Propositional.
-
-
