@@ -153,7 +153,7 @@ intros [H [H1 H2]].
 split; [split; assumption | assumption].
 Qed.
 
-(* If we have a hypothsis H of A -> B and another hypothesis p of A,
+(* If we have a hypothesis H of A -> B and another hypothesis p of A,
     we may write (H p) as a hypothesis of B. *)
 Lemma and_imp_dist : (A -> B) /\ (C -> D) -> A /\ C -> B /\ D.
 Proof.
@@ -176,89 +176,208 @@ Qed.
  *)
 
 Lemma impl_distr : (A -> B) -> (A -> C) -> A -> B -> C.
-Admitted.
+Proof.
+  intros f g a b.
+  exact (g a).
+Qed.
+
 
 Lemma impl_comp : (A -> B) -> (B -> C) -> A -> C.
-Admitted.
+Proof.
+  intros f g a.
+  exact (g (f a)).
+Qed.
+
 
 Lemma impl_perm : (A -> B -> C) -> B -> A -> C.
-Admitted.
+Proof.
+  intros f b a.
+  exact (f a b).
+Qed.
 
 Lemma impl_conj : A -> B -> A /\ B.
-Admitted.
+Proof.
+  intros a b.
+  split; assumption.
+Qed.
+
 
 Lemma conj_elim_l : A /\ B -> A.
-Admitted.
+Proof.
+  intros [a b].
+  assumption.
+Qed.
 
 Lemma disj_intro_l : A -> A \/ B.
-Admitted.
+Proof.
+  intro a.
+  left; assumption.
+Qed.
+
 
 Lemma disj_elim : A \/ B -> (A -> C) -> (B -> C) -> C.
-Admitted.
+Proof.
+  intros [a|b] f g; [apply f | apply g]; assumption.
+Qed.
 
 Lemma diamond : (A -> B) -> (A -> C) -> (B -> C -> D) -> A -> D.
-Admitted.
+Proof.
+  intros f g h a.
+  exact (h (f a) (g a)).
+Qed.
 
 Lemma weak_peirce : ((((A -> B) -> A) -> A) -> B) -> B.
-Admitted.
+Proof.
+  intros f; apply f.
+  intros g; apply g.
+  intros a.
+  apply f.
+  intros _; exact a.
+Qed.
 
 Lemma imp_conj_disj : (A -> B /\ C) -> (A -> B) /\ (A -> C).
-Admitted.
+Proof.
+  intros f.
+  split; intros a; apply f; assumption.
+Qed.
 
 Lemma disj_impl_dist : (A \/ B -> C) -> (A -> C) /\ (B -> C).
-Admitted.
+Proof.
+  intros f.
+  split; intros; apply f; [left | right]; assumption.
+Qed.
 
 Lemma disj_impl_dist_inv : (A -> C) /\ (B -> C) -> A \/ B -> C.
-Admitted.
+Proof.
+  intros [f g] [a | b]; [apply f | apply g]; assumption.
+Qed.
 
 Lemma curry : (A /\ B -> C) -> A -> B -> C.
-Admitted.
+Proof.
+  intros f a b.
+  apply f; split; assumption.
+Qed.
 
 Lemma uncurry : (A -> B -> C) -> A /\ B -> C.
-Admitted.
+Proof.
+  intros f [a b].
+  exact (f a b).
+Qed.
 
 (*
  * Part 2 - Negation
  *)
 
 Lemma not_contrad :  ~(A /\ ~A).
-Admitted.
+Proof.
+  intros [a a'].
+  apply a'.
+  exact a.
+Qed.
 
 Lemma not_not_exm : ~~(A \/ ~A).
-Admitted.
+Proof.
+  intros H.
+  apply H.
+  right.
+  intros a.
+  apply H.
+  left; exact a.
+Qed.
 
 Lemma de_morgan_1 : ~(A \/ B) -> ~A /\ ~B.
-Admitted.
+Proof.
+  intros H.
+  split; intros x; apply H; [left | right]; assumption.
+Qed.
 
 Lemma de_morgan_2 : ~A /\ ~B -> ~(A \/ B).
-Admitted.
+Proof.
+  intros [a' b'] H.
+  elim H; assumption.
+Qed.
 
 Lemma de_morgan_3 : ~A \/ ~B -> ~(A /\ B).
-Admitted.
+Proof.
+  intros [a' | b'] [a b].
+  - exact (a' a).
+  - exact (b' b).
+Qed.
 
 Lemma contrapositive : (A -> B) -> (~B -> ~A).
-Admitted.
+Proof.
+  intros f b' a.
+  apply b'.
+  exact (f a).
+Qed.
 
 Lemma neg_double : A -> ~~A.
-Admitted.
+Proof.
+  intros a a'.
+  apply a'.
+  assumption.
+Qed.
 
 Lemma tneg : ~~~A -> ~A.
-Admitted.
+Proof.
+  intros x.
+  intros a.
+  apply x.
+  intros y.
+  apply y.
+  exact a.
+Qed.
 
 Lemma weak_dneg : ~~(~~A -> A).
-Admitted.
+Proof.
+  intros x.
+  apply x.
+  intros a_dneg.
+  elim a_dneg.
+  intro a.
+  apply x.
+  intros _.
+  exact a.
+Qed. (* but I don't know why this works *)
 
 (*
  * Part 3 - Classical logic
  *)
 
 Lemma em_peirce : A \/ ~A -> ((A -> B) -> A) -> A.
-Admitted.
+Proof.
+  intros [a | a'] f.
+  - exact a.
+  - apply f.
+    intros a.
+    elim a'.
+    exact a.
+Qed.
 
 Lemma peirce_dne : (((A -> False) -> A) -> A) -> ~~A -> A.
-Admitted.
+Proof.
+  intros f a_dne.
+  apply f.
+  intros a'.
+  elim a_dne.
+  intros a.
+  exact (a' a).
+Qed. (* but I don't know why this works *)
 
 Lemma dne_em : (~~(B \/ ~B)-> (B \/ ~B)) -> B \/ ~B.
-Admitted.
+Proof.
+  intros x.
+  apply x.
+  intros y.
+  apply y.
+  right.
+  intros b.
+  apply y.
+  left.
+  exact b.
+Qed. (* but I don't know why this works *)
+
+
+
 
 End Propositional.
