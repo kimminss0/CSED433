@@ -279,4 +279,30 @@ match t with
   end
 end.
 
+(* Test suite *)
+Eval compute in interp (tm_false).  (* tm_false *)
+Eval compute in interp (tm_true).   (* tm_true *)
+Eval compute in interp (tm_zero).   (* tm_zero *)
+
+Eval compute in interp (tm_if tm_true tm_zero (tm_succ tm_zero)).   (* tm_zero *)
+Eval compute in interp (tm_succ (tm_if tm_true tm_zero (tm_succ tm_zero))).   (* tm_succ tm_zero *)
+
+(* tm_if tm_zero tm_zero (tm_succ tm_zero) *)
+Eval compute in interp (tm_if tm_zero tm_zero (tm_succ tm_zero)).
+
+(* tm_if tm_zero tm_zero (tm_succ tm_zero) *)
+Eval compute in interp (tm_if (tm_pred (tm_succ tm_zero)) tm_zero (tm_succ tm_zero)).
+
+Eval compute in interp (tm_succ (tm_if tm_true tm_true tm_false)).   (* tm_succ tm_true *)
+
+Eval compute in interp (tm_pred (tm_succ tm_zero)).   (* tm_zero *)
+Eval compute in interp (tm_pred (tm_succ tm_true)).   (* tm_pred (tm_succ tm_true) *)
+Eval compute in interp (tm_pred (tm_succ (tm_succ tm_zero))).   (* tm_succ tm_zero *)
+Eval compute in interp (tm_pred (tm_succ (tm_pred (tm_succ tm_zero)))).   (* tm_zero *)
+
+Eval compute in interp (tm_iszero tm_zero).   (* tm_true *)
+Eval compute in interp (tm_iszero (tm_succ tm_zero)).   (* tm_false *)
+Eval compute in interp (tm_iszero (tm_pred (tm_succ (tm_succ tm_zero)))).   (* tm_false *)
+Eval compute in interp (tm_iszero (tm_pred (tm_succ tm_zero))).   (* tm_true *)
+
 End InductiveSet.
