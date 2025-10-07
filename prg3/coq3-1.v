@@ -1,6 +1,6 @@
 (*
   CSE-433 Logic in Computer Science, POSTECH (gla@postech.ac.kr)
-    --- Proof terms 
+    --- Proof terms
 
   The handin directory is programming2.postech.ac.kr:/home/class/cs433/<HemosID>/.
  *)
@@ -10,7 +10,7 @@ Section ProofTerm.
 Variables A B C D : Prop.
 
 (*
- * Tactics 
+ * Tactics
  *)
 
 Definition impl_distr : (A -> B) -> (A -> C) -> A -> B -> C := .
@@ -61,5 +61,4 @@ Definition peirce_dne : (((A -> False) -> A) -> A) -> ~~A -> A := .
 
 Definition dne_em : (~~(B \/ ~B)-> (B \/ ~B)) -> B \/ ~B := .
 
-End ProofTerm. 
-
+End ProofTerm.
