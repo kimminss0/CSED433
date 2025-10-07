@@ -139,11 +139,19 @@ Eval compute in concat (cons RP (cons LP (cons RP (cons LP eps)))) (cons RP (con
 
 (* Write a recursive function 'mult' that multiplies two natural numbers. *)
 
-Fixpoint mult (m n:nat) ...
+Fixpoint mult (m n:nat) {struct m} : nat :=
+match m with
+| O => O
+| S m' => plus n (mult m' n)
+end.
 
 (* Write a recursive function 'sum_n' such that 'sum_n n' adds natural number zero (O) up to n (inclusive). *)
 
-Fixpoint sum_n (n:nat) ...
+Fixpoint sum_n (n:nat) {struct n}: nat :=
+match n with
+| O => O
+| S n' => plus n (sum_n n')
+end.
 
 (* Write a recursive function is_equal taking two natural numbers.
    It returns TT if the two natural numbers are equal, and FF otherwise.
@@ -153,7 +161,12 @@ Inductive bool : Set :=
 | TT : bool
 | FF : bool.
 
-Fixpoint is_equal (m n:nat) ...
+Fixpoint is_equal (m n:nat) {struct m} : bool :=
+match (m, n) with
+| (O, O) => TT
+| (S m', S n') => is_equal m' n'
+| _ => FF
+end.
 
 (* Write a tail-recursive function fib2 for Fibonacci function using the following definition:
 
@@ -161,7 +174,11 @@ Fixpoint is_equal (m n:nat) ...
       | fib2 m n p = fib2 n (m + n) (p - 1)       // p >= 1
  *)
 
-Fixpoint fib2 (m n p:nat) ...
+Fixpoint fib2 (m n p:nat) {struct p} : nat :=
+match p with
+| O => m
+| S p' => fib2 n (plus m n) p'
+end.
 
 Eval compute in mult (S (S O)) (S (S (S (S (S (S (S O))))))).
 Eval compute in sum_n (S (S (S (S (S (S (S O))))))).
@@ -169,7 +186,11 @@ Eval compute in fib2 O (S O) (S (S (S (S (S (S (S O))))))).
 
 (* Write a tail-recursive function reverse' for reversing a given string of parentheses. *)
 
-Fixpoint reverse' (s sa:T) ...
+Fixpoint reverse' (s sa:T) {struct s} : T :=
+match s with
+| eps => sa
+| cons e s' => reverse' s' (cons e sa)
+end.
 
 Definition reverse (s:T) := reverse' s eps.
 
@@ -211,7 +232,15 @@ Examples:
  *)
 
 Fixpoint tm_to_nat (t : tm) {struct t} : nat_option :=
-  ...
+match t with
+| tm_zero => some_nat O
+| tm_succ t' =>
+  match tm_to_nat t' with
+  | some_nat n => some_nat (S n)
+  | no_nat => no_nat
+  end
+| _ => no_nat
+end.
 
 (* Define a recursive function interp that returns the result of evaluating its argument (reducing it until no
    further reduction rule is applicable) under the small-step semantics described in the separate handout.
@@ -219,6 +248,35 @@ Fixpoint tm_to_nat (t : tm) {struct t} : nat_option :=
  *)
 
 Fixpoint interp (t:tm) {struct t} : tm :=
-  ...
+match t with
+| tm_true | tm_false | tm_zero => t
+| tm_if tcond t1 t2 =>
+  match interp tcond with
+  | tm_true => interp t1
+  | tm_false => interp t2
+  | t' => tm_if t' t1 t2
+  end
+| tm_succ t' => tm_succ (interp t')
+| tm_pred t' =>
+  match interp t' with
+  | tm_zero => tm_zero
+  | tm_succ t'' as ts =>
+    match tm_to_nat t'' with
+    | some_nat _ => t''
+    | no_nat => tm_pred ts
+    end
+  | t'' => tm_pred t''
+  end
+| tm_iszero t' =>
+  match interp t' with
+  | tm_zero => tm_true
+  | tm_succ t'' as ts =>
+    match tm_to_nat t'' with
+    | some_nat _ => tm_false
+    | no_nat => tm_iszero ts
+    end
+  | t'' => tm_iszero t''
+  end
+end.
 
 End InductiveSet.
