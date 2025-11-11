@@ -1,15 +1,15 @@
 (*
   CSE-433 Logic in Computer Science, POSTECH (gla@postech.ac.kr)
-    --- Inductive Datatypes, Part 2 
+    --- Inductive Datatypes, Part 2
 
-  The handin directory is programming2.postech.ac.kr:/home/class/cs433/handin/<HemosID>/.  
+  The handin directory is programming2.postech.ac.kr:/home/class/cs433/handin/<HemosID>/.
  *)
 
 Section InductiveDatatypeTwo.
 
-(* 
+(*
   The inductive datatype nat and its two operations plus and mult are already defined in the default environment.
-  Moreover you may use infix operators + and * for plus and mult, respectively. 
+  Moreover you may use infix operators + and * for plus and mult, respectively.
  *)
 
 (* O + S O is another way of writing plus O (S O). *)
@@ -31,41 +31,161 @@ end.
 
 (* Problem 3 *)
 
-(* Prove the same lemmas that are given in Part 1, but using the datatype nat provided in the default environment. 
-   In most cases, you should be able to reuse the proofs from Part 1. 
+(* Prove the same lemmas that are given in Part 1, but using the datatype nat provided in the default environment.
+   In most cases, you should be able to reuse the proofs from Part 1.
  *)
 
 Lemma plus_n_O : forall n:nat, n = n + O.
 Proof.
+intro n.
+induction n.
+- reflexivity.
+- simpl.
+  rewrite <- IHn.
+  reflexivity.
 Qed.
 
 Lemma plus_n_S : forall n m:nat, S (n + m) = n + (S m).
 Proof.
+intros n m.
+induction n.
+- reflexivity.
+- simpl plus at 2.
+  rewrite <- IHn.
+  reflexivity.
 Qed.
 
 Lemma plus_com : forall n m:nat, n + m = m + n.
 Proof.
+intros n m.
+induction n.
+- induction m.
+  -- reflexivity.
+  -- simpl.
+     rewrite <- IHm.
+     rewrite -> plus_n_S.
+     reflexivity.
+- induction m.
+  -- simpl; rewrite -> IHn; reflexivity.
+  -- simpl; rewrite -> IHn.
+     rewrite <- plus_n_S.
+     reflexivity.
 Qed.
 
 Lemma plus_assoc : forall (m n l:nat), (m + n) + l = m + (n + l).
 Proof.
+intros m n l.
+induction l.
+- rewrite <- plus_n_O.
+  rewrite <- plus_n_O.
+  reflexivity.
+- rewrite <- plus_n_S.
+  rewrite <- plus_n_S.
+  rewrite <- plus_n_S.
+  rewrite <- IHl.
+  reflexivity.
 Qed.
 
 (* Problem 4 *)
 
-(* Prove the same theorem sum_n_plus given in Part 1, but using the datatype nat provided in the default environment. 
-   Introduce additional lemmas as necessary. 
+(* Prove the same theorem sum_n_plus given in Part 1, but using the datatype nat provided in the default environment.
+   Introduce additional lemmas as necessary.
  *)
+(*
+Lemma double_dist : forall (m n: nat), double (plus m n) = plus (double m) (double n).
+Proof.
+intros m n.
+induction n.
+induction m.
+- reflexivity.
+- simpl.
+  rewrite -> plus_com.
+  rewrite -> plus_n_S.
+  unfold double.
+  simpl.
+  rewrite -> plus_com.
+  rewrite <- plus_n_O.
+  reflexivity.
+- rewrite <- plus_n_S.
+  unfold double.
+  rewrite -> plus_n_S.
+  rewrite <- plus_assoc.
+  rewrite -> (plus_com (m + S n) m).
+  rewrite <- plus_assoc.
+  rewrite -> plus_assoc.
+  unfold double.
+  reflexivity.
+Qed.
+
+Lemma mult_zero : forall n:nat, n * O = O.
+Proof.
+  intro n.
+  induction n.
+  - reflexivity.
+  - simpl.
+    rewrite -> IHn.
+    reflexivity.
+Qed.
+
+Lemma mult_one : forall n:nat, n * (S O) = n.
+Proof.
+  intro n.
+  induction n.
+  - reflexivity.
+  - simpl.
+    rewrite -> IHn.
+    reflexivity.
+Qed.
+
+Lemma mult_succ : forall (m n: nat), plus m (mult m n) = mult m (S n).
+Proof.
+  intros m n.
+  induction m.
+  - simpl; reflexivity.
+  - simpl.
+    rewrite <- IHm.
+    rewrite <- plus_assoc.
+    rewrite <- plus_assoc.
+    rewrite <- plus_com.
+    rewrite <- plus_com.
+    rewrite <- (plus_com m n).
+    reflexivity.
+Qed.
+
+Lemma mult_com : forall n m:nat, n * m = m * n.
+Proof.
+intros n m.
+induction n.
+induction m.
+- reflexivity.
+- simpl; rewrite <- IHm; reflexivity.
+- simpl.
+  rewrite IHn.
+  rewrite mult_succ.
+  reflexivity.
+Qed.
 
 Theorem sum_n_plus : forall n:nat, double (sum_n n) = n + n * n.
 Proof.
+  intro n.
+  induction n.
+  - simpl; reflexivity.
+  - rewrite -> plus_com.
+    simpl sum_n.
+    rewrite -> plus_com; rewrite -> plus_n_S.
+    rewrite -> double_dist; unfold double at 2; rewrite <- plus_assoc.
+    rewrite -> IHn; rewrite -> mult_succ.
+    rewrite -> (plus_com (n * (S n)) (S n)).
+    rewrite -> mult_com.
+    rewrite -> mult_succ.
+    reflexivity.
 Qed.
-
+*)
 (* Problem 5 *)
 
-(* We will use the Coq library Arith which provides various theorems on the datatype nat. 
+(* We will use the Coq library Arith which provides various theorems on the datatype nat.
    All the previous lemmas are already provided the Arith library.
-   You can search for appropriate lemmas by using the commands SearchPattern and SearchRewrite. 
+   You can search for appropriate lemmas by using the commands SearchPattern and SearchRewrite.
  *)
 Require Import Arith.
 
@@ -85,30 +205,64 @@ SearchRewrite ((_ + _) + _).
 SearchRewrite (_ + (_ + _)).
 SearchRewrite (_ + _ + _).
 
-(* Prove the same theorem sum_n_plus, but using the Arith library. 
+(* Prove the same theorem sum_n_plus, but using the Arith library.
    You can find in the Arith library all the lemmas that you need to complete the proof. *)
 (****** Do not introduce new lemmas. ******)
 
 Theorem sum_n_plus' : forall n:nat, double (sum_n n) = n + n * n.
 Proof.
+  intro n.
+  induction n.
+  - simpl; reflexivity.
+  - rewrite plus_com.
+    simpl sum_n.
+    rewrite plus_com.
+    rewrite plus_n_S.
+    unfold double.
+    SearchPattern (_ + _ + _ = _ + (_ + _)).
+    rewrite Nat.add_shuffle1.
+    fold (double (sum_n n)).
+    rewrite IHn.
+    SearchRewrite (_ + (_ * _)).
+    SearchPattern (_ * 1 = _).
+    rewrite <- (Nat.mul_1_r n) at 1.
+    SearchRewrite ((_ * _) + (_ * _)).
+    rewrite <- Nat.mul_add_distr_l.
+    SearchPattern (1 + _ = S _).
+    rewrite Nat.add_1_l.
+    rewrite <- plus_assoc.
+    rewrite <- (Nat.mul_1_l (S n)) at 2.
+    rewrite <- Nat.mul_add_distr_r.
+    rewrite Nat.add_1_r.
+    reflexivity.
 Qed.
 
 (* Problem 6 *)
 
-(* We will use the Coq library ArithRing which provides an automation tactic ring and ring_simplify. 
+(* We will use the Coq library ArithRing which provides an automation tactic ring and ring_simplify.
  *)
 Require Import ArithRing.
 
 (* Prove the same theorem sum_n_plus using the tactic 'ring_simplify.'
-   Instead of the tactic 'ring', use the tactic 'ring_simplify' which displays how arithmetic expressions are 
-   transformed. 
+   Instead of the tactic 'ring', use the tactic 'ring_simplify' which displays how arithmetic expressions are
+   transformed.
   *)
 (****** Do not introduce new lemmas. ******)
 
 Theorem sum_n_plus'' : forall n:nat, double (sum_n n) = n + n * n.
 Proof.
+intro n.
+induction n.
+- simpl; reflexivity.
+- simpl sum_n.
+  rewrite plus_com.
+  rewrite plus_n_S.
+  unfold double.
+  rewrite Nat.add_shuffle1.
+  fold (double (sum_n n)).
+  rewrite IHn.
+  ring_simplify.
+  reflexivity.
 Qed.
 
 End InductiveDatatypeTwo.
-
-
